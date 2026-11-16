@@ -9,30 +9,13 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "ton.h"
+
 /** defines */
 
-#define CTRL_KEY(k) ((k) & 0x1f)
 #define TON_VERSION "0.0.1"
 
-enum editorKey {
-    ARROW_LEFT = 1000,
-    ARROW_RIGHT,
-    ARROW_UP,
-    ARROW_DOWN,
-    DEL_KEY,
-    HOME_KEY,
-    END_KEY,
-    PAGE_UP,
-    PAGE_DOWN
-};
-
 /** data */
-struct editorConfig {
-    int cx, cy;
-    int screenRows;
-    int screenCols;
-    struct termios orig_termios;
-};
 
 struct editorConfig E;
 
@@ -46,12 +29,12 @@ void die(const char *s) {
     exit(1);
 }
 
-void disableRawMode() {
+void disableRawMode(void) {
     if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &E.orig_termios) == -1)
         die("tcsetattr");
 }
 
-void enableRawMode() {
+void enableRawMode(void) {
     if (tcgetattr(STDIN_FILENO, &E.orig_termios) == -1)
         die("tcgetattr");
     atexit(disableRawMode);
@@ -69,7 +52,7 @@ void enableRawMode() {
         die("tcsetattr");
 }
 
-int editorReadKey() {
+int editorReadKey(void) {
     int nread;
     char c;
 
@@ -122,8 +105,6 @@ int editorReadKey() {
     } else {
         return c;
     }
-
-    return c;
 }
 
 int getWindowSize(int *rows, int *cols) {
@@ -139,13 +120,6 @@ int getWindowSize(int *rows, int *cols) {
 }
 
 /** append buffer */
-
-typedef struct a_buf {
-    char *b;
-    int len;
-} abuf;
-
-#define ABUF_INIT {NULL, 0}
 
 void abAppend(abuf *ab, const char *s, int len) {
     char *new = realloc(ab->b, ab->len + len);
@@ -192,7 +166,7 @@ void editorDrawRows(abuf *ab) {
     }
 }
 
-void editorRefreshScreen() {
+void editorRefreshScreen(void) {
     abuf ab = ABUF_INIT;
 
     abAppend(&ab, "\x1b[?25l", 6);
@@ -204,7 +178,9 @@ void editorRefreshScreen() {
     char buf[32];
     snprintf(buf, sizeof(buf), "\x1b[%d;%dH", E.cy + 1, E.cx + 1);
     abAppend(&ab, buf, strlen(buf));
+
     abAppend(&ab, "\x1b[?25h", 6);
+
     write(STDOUT_FILENO, ab.b, ab.len);
     abFree(&ab);
 }
@@ -236,7 +212,7 @@ void editorMoveCursor(int key) {
     }
 }
 
-void editorProcessKeypress() {
+void editorProcessKeypress(void) {
     int c = editorReadKey();
 
     switch (c) {
