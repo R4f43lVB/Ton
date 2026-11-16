@@ -1,64 +1,64 @@
 # Ton
 
-Ton é um editor de texto para terminal escrito em C puro, sem dependências externas. Ele coloca o terminal em *raw mode* e desenha a tela direto com sequências de escape VT100.
+Ton is a terminal text editor written in pure C with no external dependencies. It puts the terminal into raw mode and draws the screen directly with VT100 escape sequences.
 
-Versão atual: `0.0.1`
+Current version: `0.0.1`
 
-## Funcionalidades
+## Features
 
-- Terminal em *raw mode* (lê tecla por tecla, sem eco e sem buffer de linha)
-- Tela renderizada com sequências de escape VT100, usando um buffer de escrita para evitar flicker
-- Tela de boas-vindas centralizada com a versão do editor
-- Detecção automática do tamanho do terminal
-- Navegação com o cursor pela tela
+- Terminal in raw mode (reads key by key, with no echo and no line buffering)
+- Screen rendered with VT100 escape sequences, using a write buffer to avoid flicker
+- Centered welcome screen showing the editor version
+- Automatic terminal size detection
+- Cursor navigation across the screen
 
-## Requisitos
+## Requirements
 
-- Sistema compatível com POSIX (Linux, macOS ou WSL no Windows), já que o editor usa `termios.h`, `unistd.h` e `sys/ioctl.h`
-- Compilador C com suporte a C99 (`gcc` ou `clang`)
-- `make` (opcional, mas recomendado)
+- A POSIX-compatible system (Linux, macOS, or WSL on Windows), since the editor uses `termios.h`, `unistd.h` and `sys/ioctl.h`
+- A C compiler with C99 support (`gcc` or `clang`)
+- `make` (optional, but recommended)
 
-## Como compilar
+## Building
 
-Com `make`:
+With `make`:
 
 ```sh
 make
 ```
 
-Sem `make`:
+Without `make`:
 
 ```sh
 cc ton.c -o ton -Wall -Wextra -pedantic -std=c99
 ```
 
-Para remover o binário gerado:
+To remove the generated binary:
 
 ```sh
 make clean
 ```
 
-## Como rodar
+## Running
 
 ```sh
 ./ton
 ```
 
-### Atalhos
+### Key bindings
 
-| Tecla | Ação |
+| Key | Action |
 | --- | --- |
-| Setas (`↑` `↓` `←` `→`) | Movem o cursor |
-| `Home` | Vai para o início da linha |
-| `End` | Vai para o fim da linha |
-| `Page Up` / `Page Down` | Vão para o topo / fim da tela |
-| `Ctrl + Q` | Sai do editor |
+| Arrow keys (`↑` `↓` `←` `→`) | Move the cursor |
+| `Home` | Go to the start of the line |
+| `End` | Go to the end of the line |
+| `Page Up` / `Page Down` | Go to the top / bottom of the screen |
+| `Ctrl + Q` | Quit the editor |
 
-## Estrutura do projeto
+## Project structure
 
 ```
 .
-├── Makefile   # Regras de build (make / make clean)
-├── ton.c      # Código-fonte do editor
-└── ton        # Binário compilado (Linux x86-64)
+├── Makefile   # Build rules (make / make clean)
+├── ton.c      # Editor source code
+└── ton        # Compiled binary (Linux x86-64)
 ```
