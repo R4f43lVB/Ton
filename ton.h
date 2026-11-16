@@ -2,6 +2,7 @@
 #define TON_H
 
 #include <termios.h>
+#include <stdlib.h>
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
@@ -21,6 +22,10 @@ enum editorKey {
     PAGE_DOWN
 };
 
+typedef struct erow {
+    int size;
+    char *chars;
+} erow;
 
 /*
 Structure containing the configuration for the cursor, the window and the original terminal attributes
@@ -34,6 +39,8 @@ struct editorConfig {
     int cx, cy;
     int screenRows;
     int screenCols;
+    int numRows;
+    erow *row;
     struct termios orig_termios;
 };
 
@@ -63,6 +70,9 @@ int editorReadKey(void);
 Uses `winsize` (`sys/ioctl.h`) to get the window's dimensions and stores them in `rows` and `cols`
 */
 int getWindowSize(int *rows, int *cols);
+
+// TODO: Set documentation
+void editorAppendRow(char *s, size_t len);
 
 /*
 Custom definition for dynamic string type (currently only supports appending).
@@ -118,6 +128,6 @@ Initiates Ton
 */
 void initEditor(void);
 
-int main(void);
+int main(int argc, char *argv[]);
 
 #endif
