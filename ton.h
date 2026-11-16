@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #define CTRL_KEY(k) ((k) & 0x1f)
+#define TON_TAB_STOP 4
 
 /*
 This enum handles key presses that send escape sequences.
@@ -24,7 +25,9 @@ enum editorKey {
 
 typedef struct erow {
     int size;
+    int rsize;
     char *chars;
+    char *render;
 } erow;
 
 /*
@@ -37,6 +40,7 @@ obtained when the program first runs.
 */
 struct editorConfig {
     int cx, cy;
+    int rx;
     int rowoff;
     int coloff;
     int screenRows;
