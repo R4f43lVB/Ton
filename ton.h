@@ -37,6 +37,8 @@ obtained when the program first runs.
 */
 struct editorConfig {
     int cx, cy;
+    int rowoff;
+    int coloff;
     int screenRows;
     int screenCols;
     int numRows;

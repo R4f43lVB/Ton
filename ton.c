@@ -189,10 +189,26 @@ void abFree(abuf *ab) {
 
 /** output */
 
+void editorScroll(void) {
+    if (E.cy < E.rowoff) {
+        E.rowoff = E.cy;
+    }
+    if (E.cy >= E.rowoff + E.screenRows) {
+        E.rowoff = E.cy - E.screenRows + 1;
+    }
+    if (E.cx < E.coloff) {
+        E.coloff = E.cx;
+    }
+    if (E.cx >= E.coloff + E.screenCols) {
+        E.coloff = E.cx - E.screenCols + 1;
+    }
+}
+
 void editorDrawRows(abuf *ab) {
     int y;
     for (y = 0; y < E.screenRows; y++) {
-        if (y >= E.numRows) {
+        int filerow = y + E.rowoff;
+        if (filerow >= E.numRows) {
             if (E.numRows == 0 && y == E.screenRows / 3) {
                 char welcome[80];
                 int welcomelen = snprintf(
@@ -212,10 +228,12 @@ void editorDrawRows(abuf *ab) {
                 abAppend(ab, "~", 1);
             }
         } else {
-            int len = E.row[y].size;
+            int len = E.row[filerow].size - E.coloff;
+            if (len < 0)
+                len = 0;
             if (len > E.screenCols)
                 len = E.screenCols;
-            abAppend(ab, E.row[y].chars, len);
+            abAppend(ab, &E.row[filerow].chars[E.coloff], len);
         }
 
         abAppend(ab, "\x1b[K", 3);
@@ -226,6 +244,8 @@ void editorDrawRows(abuf *ab) {
 }
 
 void editorRefreshScreen(void) {
+    editorScroll();
+
     abuf ab = ABUF_INIT;
 
     abAppend(&ab, "\x1b[?25l", 6);
@@ -235,7 +255,7 @@ void editorRefreshScreen(void) {
 
     // Handles moving the cursor
     char buf[32];
-    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", E.cy + 1, E.cx + 1);
+    snprintf(buf, sizeof(buf), "\x1b[%d;%dH", (E.cy - E.rowoff) + 1, (E.cx - E.coloff) + 1);
     abAppend(&ab, buf, strlen(buf));
 
     abAppend(&ab, "\x1b[?25h", 6);
@@ -247,6 +267,7 @@ void editorRefreshScreen(void) {
 /** input */
 
 void editorMoveCursor(int key) {
+    erow *row = (E.cy >= E.numRows) ? NULL : &E.row[E.cy];
     switch (key) {
     case ARROW_LEFT:
         if (E.cx != 0) {
@@ -254,9 +275,9 @@ void editorMoveCursor(int key) {
         }
         break;
     case ARROW_RIGHT:
-        if (E.cx != E.screenCols - 1) {
-            E.cx++;
-        }
+    if (row && E.cx < row->size) {
+        E.cx++;
+    }
         break;
     case ARROW_UP:
         if (E.cy != 0) {
@@ -264,7 +285,7 @@ void editorMoveCursor(int key) {
         }
         break;
     case ARROW_DOWN:
-        if (E.cy != E.screenRows - 1) {
+        if (E.cy < E.numRows) {
             E.cy++;
         }
         break;
@@ -307,9 +328,11 @@ void editorProcessKeypress(void) {
 
 /** init */
 
-void initEditor() {
+void initEditor(void) {
     E.cx = 0;
     E.cy = 0;
+    E.rowoff = 0;
+    E.coloff = 0;
     E.numRows = 0;
     E.row = NULL;
 
